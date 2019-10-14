@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.DynamoDBv2;
 using DynamoDb.Libs.DynamoDb;
 using Microsoft.AspNetCore.Builder;
@@ -33,14 +34,23 @@ namespace DynamoDB
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+            /* Begin - This Code was added because the video examples was not working. - Eduardo Santana 2019 - 10 - 14 */
+            var awsOptions = Configuration.GetAWSOptions();
+            awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(Configuration["AWS:AccessKey"], Configuration["AWS:SecretKey"]);
+            awsOptions.Region = RegionEndpoint.CACentral1;
+            services.AddDefaultAWSOptions(awsOptions);
+            /* End */
 
-            Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", Configuration["AWS:AccessKey"]);
-            Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", Configuration["AWS:SecretKey"]);
-            Environment.SetEnvironmentVariable("AWS_REGION", Configuration["AWS:Region"]);
+            /*
+            * Begin - This code is not working properly is not setting the variable
+            * Therefore we are using the code above. - Eduardo Santana 2019 - 10 - 14 
+            * services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+            * Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", Configuration["AWS:AccessKey"]);
+            * Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", Configuration["AWS:SecretKey"]);
+            * Environment.SetEnvironmentVariable("AWS_REGION", Configuration["AWS:Region"]);
+            * End */
 
             services.AddAWSService<IAmazonDynamoDB>();
 
